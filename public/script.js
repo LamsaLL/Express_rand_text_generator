@@ -1,8 +1,9 @@
 
 const form  = document.querySelector('form');
 const textaera = document.querySelector('textarea');
+const generateButton = document.querySelector('input[name="generate"]')
 
-const getRandomText = function(callback){
+const fetchRandomText = function(callback){
     fetch('http://localhost:3000/randomText')
     .then(response =>  response.text())
     .then(callback)
@@ -11,21 +12,39 @@ const getRandomText = function(callback){
     });
 }
 
+const addRandomText = function(jsonRandomText){
+   
+    fetch('http://localhost:3000/randomText', {
+        method: 'POST',
+        headers: {'Content-Type' : 'application/json; charset=UTF-8'},
+        body: JSON.stringify(jsonRandomText)
+    })
+    .then((response) => response.text())
+    .then(console.log('Texte ajouté'))
+    .catch(() => console.error("Impossible d'envoyer le random Texte"));
+
+}
+
 const displayRandomText = function(randomText){
     textaera.innerText = randomText;
 }
 
-form.addEventListener('submit', function(e){
+generateButton.addEventListener('click', function(e){
     e.preventDefault();
 
-    const buttonClicked = document.activeElement.name;
-
-    if(buttonClicked === "generate"){
-        getRandomText( ( randomText ) => displayRandomText(randomText) );
-    }
-    else{
-        console.log('add random text');
-    }
+    fetchRandomText( ( randomText ) => displayRandomText(randomText) );
 })
 
-getRandomText( ( randomText ) => displayRandomText(randomText) );
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+    
+    const content = e.target.elements.randomText;
+
+    const jsonRandomText = {
+        content: content.innerHTML
+    };
+    
+    addRandomText(jsonRandomText);
+})
+
+fetchRandomText( ( randomText ) => displayRandomText(randomText) );
